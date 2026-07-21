@@ -19,7 +19,7 @@
     }
   },
 
-  // 1. Installs pandas, numpy, and matplotlib automatically via pip
-  // 2. Creates the data directory and seeds a starter SQLite database
-  "postCreateCommand": "pip install --upgrade pip && pip install pandas numpy matplotlib && mkdir -p data && python3 -c 'import sqlite3; conn = sqlite3.connect(\"data/bank_risk.db\"); conn.execute(\"CREATE TABLE IF NOT EXISTS test (id INT);\"); conn.close()'"
+  // 1. Installs data stack (pandas, numpy, matplotlib)
+  // 2. Automatically pulls and hydrates the IBM AML SQLite DB on launch
+  "postCreateCommand": "pip install --upgrade pip && pip install pandas numpy matplotlib && mkdir -p data && curl -L -o data/bank_risk_aml.zip https://github.com/SuccinctGasca/RiskTrainingCourse2/releases/download/1.0.0/bank_risk_aml_medium.zip && unzip data/bank_risk_aml.zip -d data/ && rm data/bank_risk_aml.zip"
 }
