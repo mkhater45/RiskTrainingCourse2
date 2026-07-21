@@ -1,0 +1,25 @@
+{
+  "name": "Python & SQL Risk Analytics Lab",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "jupyter.interactiveWindow.intro.show": false
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter",
+        "qwtel.sqlite-viewer",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-sqlite"
+      ]
+    }
+  },
+
+  // 1. Installs pandas, numpy, and matplotlib automatically via pip
+  // 2. Creates the data directory and seeds a starter SQLite database
+  "postCreateCommand": "pip install --upgrade pip && pip install pandas numpy matplotlib && mkdir -p data && python3 -c 'import sqlite3; conn = sqlite3.connect(\"data/bank_risk.db\"); conn.execute(\"CREATE TABLE IF NOT EXISTS test (id INT);\"); conn.close()'"
+}
