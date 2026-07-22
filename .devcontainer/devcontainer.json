@@ -17,6 +17,6 @@
       ]
     }
   },
-
-  "postCreateCommand": "pip install --upgrade pip && pip install pandas polars duckdb pyarrow numpy matplotlib"
+  
+  "postCreateCommand": "pip install --upgrade pip && pip install ipykernel pandas polars duckdb pyarrow numpy matplotlib"
 }
