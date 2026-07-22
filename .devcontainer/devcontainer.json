@@ -13,11 +13,10 @@
         "ms-python.vscode-pylance",
         "ms-toolsai.jupyter",
         "ms-toolsai.vscode-jupyter-powertoys",
-        "randomfractions.data-wrangler"
+        "ms-toolsai.datawrangler"
       ]
     }
   },
 
-  // Installs the modern analytical stack (no heavy zips/unzipping needed!)
   "postCreateCommand": "pip install --upgrade pip && pip install pandas polars duckdb pyarrow numpy matplotlib"
 }
