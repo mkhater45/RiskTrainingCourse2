@@ -1,7 +1,7 @@
 {
   "name": "Python & SQL Risk Analytics Lab",
   "image": "mcr.microsoft.com/devcontainers/python:3.11",
-  
+
   "customizations": {
     "vscode": {
       "settings": {
@@ -12,14 +12,12 @@
         "ms-python.python",
         "ms-python.vscode-pylance",
         "ms-toolsai.jupyter",
-        "qwtel.sqlite-viewer",
-        "mtxr.sqltools",
-        "mtxr.sqltools-driver-sqlite"
+        "ms-toolsai.vscode-jupyter-powertoys",
+        "randomfractions.data-wrangler"
       ]
     }
   },
 
-  // 1. Installs data stack (pandas, numpy, matplotlib)
-  // 2. Automatically pulls and hydrates the IBM AML SQLite DB on launch
-  "postCreateCommand": "pip install --upgrade pip && pip install pandas numpy matplotlib && mkdir -p data && curl -L -o data/bank_risk_aml.zip https://github.com/SuccinctGasca/RiskTrainingCourse2/releases/download/1.0.0/bank_risk_aml_medium.zip && unzip data/bank_risk_aml.zip -d data/ && rm data/bank_risk_aml.zip"
+  // Installs the modern analytical stack (no heavy zips/unzipping needed!)
+  "postCreateCommand": "pip install --upgrade pip && pip install pandas polars duckdb pyarrow numpy matplotlib"
 }
