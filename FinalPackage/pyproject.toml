@@ -1,0 +1,78 @@
+# ==============================================================================
+# pyproject.toml
+#
+# This file is the modern standard for configuring Python packages. It tells
+# build tools (like pip or build) exactly how to take your source code and
+# package it up so others can install it.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# [project] Section
+#
+# This is the core metadata for your package. Think of it as the package's
+# "ID card." When you publish a package (e.g., to an internal registry or PyPI),
+# this is the information that gets displayed.
+# ------------------------------------------------------------------------------
+[project]
+# The 'name' is what users will type when they run: pip install <name>
+name = "risk_utils"
+
+# The 'version' of your package. It's crucial to bump this number when you
+# release updates so users get the latest code.
+version = "0.1.0"
+
+# A brief summary of what this package does.
+description = "Shared risk-analysis utilities for the training program"
+
+# The 'requires-python' field ensures that users can only install this package
+# if their Python version meets the requirement. This prevents mysterious errors
+# from users running outdated Python versions.
+requires-python = ">=3.10"
+
+# The 'dependencies' list is vital. These are the external libraries your code
+# needs to run. When someone runs `pip install risk_utils`, pip will automatically
+# download and install pandas, duckdb, and openpyxl alongside your package.
+dependencies = [
+    "pandas",
+    "duckdb",
+    "openpyxl",
+]
+
+# ------------------------------------------------------------------------------
+# [project.optional-dependencies] Section
+#
+# This section defines "extras"—packages that aren't required for normal usage
+# but are useful for specific tasks, like development or testing.
+# ------------------------------------------------------------------------------
+[project.optional-dependencies]
+# By defining a 'dev' extra, developers working on the source code can install
+# the package AND testing tools at once by running: pip install -e .[dev]
+# Regular users just typing `pip install risk_utils` will NOT get pytest.
+dev = ["pytest"]
+
+# ------------------------------------------------------------------------------
+# [build-system] Section
+#
+# This is the most technical part of the file. Before pyproject.toml existed,
+# Python packaging was chaotic. This section standardizes how the package is built.
+# ------------------------------------------------------------------------------
+[build-system]
+# 'requires' tells pip what tool it needs to download just to *build* the package.
+# Here, we are saying we need 'setuptools' to do the building.
+requires = ["setuptools"]
+
+# 'build-backend' specifies the exact Python object inside the tool (setuptools)
+# that will actually perform the build process.
+build-backend = "setuptools.build_meta"
+
+# ------------------------------------------------------------------------------
+# [tool.*] Sections (Tool-Specific Configuration)
+#
+# Any section starting with 'tool.' is used to configure specific tools used in
+# your project (like linters, formatters, or build tools).
+# ------------------------------------------------------------------------------
+[tool.setuptools]
+# Here, we are explicitly telling setuptools which directories contain the actual
+# Python code we want included in the final package. It ensures the "risk_utils"
+# folder is bundled up, and ignores tests, documentation, or other root folders.
+packages = ["risk_utils"]
