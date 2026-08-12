@@ -1,0 +1,56 @@
+from datetime import datetime
+
+# Multipliers to convert 1 unit of foreign currency into USD (approximate rates)
+to_usd_factors = {
+    "US Dollar": 1.0,
+    "Euro": 1.08,
+    "Yuan": 0.14,
+    "Yen": 0.0065,
+    "Rupee": 0.012,
+    "Ruble": 0.011,
+    "UK Pound": 1.27,
+    "Canadian Dollar": 0.74,
+    "Mexican Peso": 0.058,
+    "Australian Dollar": 0.65,
+    "Brazil Real": 0.18,
+    "Swiss Franc": 1.13,
+    "Shekel": 0.27,
+    "Saudi Riyal": 0.27
+}
+
+class Transaction:
+    """A flagged transaction, with the context needed to act on it."""
+
+    def __init__(self, account_number, account_name, amount, currency, is_laundering, timestamp=None):
+        self.account_number = account_number
+        self.account_name = account_name
+        self.amount = amount
+        self.currency = currency
+        self.is_laundering = bool(is_laundering)
+        self.timestamp = timestamp or datetime.now()
+
+    def summary(self):
+        flag = "LAUNDERING" if self.is_laundering else "Not Laundering"
+        return f"[{flag}] account_number={self.account_number} amount={self.amount}"
+        
+    def is_large(self):
+        
+        #Fill in the logic for this method
+        return False
+
+#Task:
+# 1) Create a class called CurrencyConverter that has a method called to_usd(amount,base_currency) and returns the amount in USD
+# 2) Use composition to make the currencyConverter class be part of the Transaction class
+# 3) Finish the method is_large() 
+
+#Question: What type of access control should currencyConverter have inside the Transaction class?
+
+
+
+#Testing
+firstTransaction = Transaction(account_number = "A1234", 
+                               account_name = "Midwest Bank", 
+                               amount = 9999, 
+                               currency = "US Dollar", 
+                               is_laundering=1)
+print("firstTransaction.is_large(): " + str(firstTransaction.is_large()) )
