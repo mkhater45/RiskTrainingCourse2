@@ -13,7 +13,7 @@ BENFORD_EXPECTED_PCT = {
     9: 4.6,
 }
 
-def benford_check(con, table_url):
+def benford_check(con):
     """Leading-digit distribution of amount_paid.
 
     Compare observed_pct against BENFORD_EXPECTED_PCT below - a large gap
@@ -23,11 +23,11 @@ def benford_check(con, table_url):
     result = con.sql(f"""
         WITH digits AS (
             SELECT LEFT(CAST(amount_paid AS VARCHAR), 1)::INT AS digit
-            FROM '{table_url}' WHERE amount_paid >= 1
-        ),
+            FROM transactions WHERE amount_paid >= 1
+        )
         
-        # complete the SQL query
-        
+        -- complete the SQL query
+        select * from digits limit 10
         
     """).df()
     
@@ -36,10 +36,13 @@ def benford_check(con, table_url):
     return result
     
 
-# Azure blob container containing the data as parquet
-TRANSACTIONS_TABLE ='https://tahastorage.blob.core.windows.net/training-public/transactions.parquet'
-conn = duckdb.connect()
+# Local DuckDB file containing the transactions table
+conn = duckdb.connect("..//..//risk.duckdb")
 
-results = benford_check(conn,TRANSACTIONS_TABLE)
+results = benford_check(conn)
+
+conn.close()
 
 print(results)
+
+
