@@ -1,5 +1,5 @@
 import duckdb
-
+from pathlib import Path
 
 BENFORD_EXPECTED_PCT = {
     1: 30.1, 
@@ -36,8 +36,11 @@ def benford_check(con):
     return result
     
 
-# Local DuckDB file containing the transactions table
-conn = duckdb.connect("..//..//risk.duckdb")
+# Get directory where fraud_checks.py lives, then look up 2 levels
+SCRIPT_DIR = Path(__file__).resolve().parent
+DB_PATH = SCRIPT_DIR.parent.parent / "risk.duckdb"
+
+conn = duckdb.connect(DB_PATH, read_only=True)
 
 results = benford_check(conn)
 
