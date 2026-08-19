@@ -61,7 +61,7 @@ prompt = f"""
 # Call Gemini API
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 response = client.models.generate_content(
-    model="gemini-2.5-flash",
+    model="gemini-3.6-flash",
     contents=prompt,
     config=types.GenerateContentConfig(
         system_instruction=system_prompt,
