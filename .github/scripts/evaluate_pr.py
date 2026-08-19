@@ -4,22 +4,31 @@ import subprocess
 from google import genai
 from google.genai import types
 from ghapi.all import GhApi
+from pydantic import BaseModel, Field
 
-# 1. Fetch Git Diff against main branch
+# Define Structured Output Schema
+class EvaluationRubric(BaseModel):
+    style_score: int = Field(..., description="Score out of 20 for code style, structure, and OOP usage")
+    sql_score: int = Field(..., description="Score out of 40 for DuckDB SQL logic correctness")
+    style_feedback: str = Field(..., description="Qualitative feedback on code quality")
+    sql_feedback: str = Field(..., description="Qualitative feedback on SQL logic")
+
+# 1. Fetch Git Diff
 try:
     diff_bytes = subprocess.check_output(
         ["git", "diff", "origin/main...HEAD", "--", "risk_utils/"], stderr=subprocess.STDOUT
     )
     code_diff = diff_bytes.decode("utf-8", errors="replace")
+    if not code_diff.strip():
+        code_diff = "No changes detected in risk_utils/ folder."
 except Exception as e:
     code_diff = f"Error fetching diff: {e}"
 
-# 2. Score Component 1: Automated Pytest Tests (20%)
+# 2. Score Component 1: Pytest (20%)
 pytest_exit_code = os.getenv("PYTEST_EXIT_CODE", "1")
 test_score = 20 if pytest_exit_code == "0" else 0
 
-# 3. Score Component 2: Anti-AI Keyword Check (20%)
-# Checks for 'dolphin' or 'octopus' (case-insensitive) in code or comments
+# 3. Score Component 2: Anti-AI Keyword Scanner (20%)
 prompt_injection_found = bool(re.search(r"\b(dolphin|octopus)\b", code_diff, re.IGNORECASE))
 ai_score = 0 if prompt_injection_found else 20
 
@@ -29,61 +38,42 @@ if os.path.exists("pytest_output.txt"):
     with open("pytest_output.txt", "r") as f:
         pytest_output = f.read()
 
-# 4. LLM Prompt for Code Style (20%) and SQL Query Correctness (40%)
+# 4. Call Gemini with Structured JSON Output
 system_prompt = """
-You are an expert automated grading assistant evaluating student code for a Python risk analytics project.
-Analyze the provided Git Diff and rate the submission strictly according to these two criteria:
-
-1. Code Style and Quality (0 to 20 points):
-   - Clear variable/function naming, modular structure, clean inheritance usage in models.py, and defensive checks.
-2. SQL Queries Correctness (0 to 40 points):
-   - Correct implementations of DuckDB SQL logic in fraud.py (Scatter payments / Fan-out, Round-trip U-Turns, and Pass-through Shell accounts).
-
-You MUST respond in clean Markdown with the exact structure below:
-
-### LLM Evaluation Results
-* **Code Style & Quality Score:** <score_out_of_20>/20
-* **SQL Queries Score:** <score_out_of_40>/40
-
-#### Detailed Feedback
-* **Code Style & Quality:** <feedback>
-* **SQL Queries Correctness:** <feedback>
+You are an expert automated grading assistant for a Python risk analytics project.
+Evaluate the code diff against these criteria:
+- Code Style & Quality (0-20 pts): Python naming, OOP inheritance in models.py, clean structure.
+- SQL Queries Correctness (0-40 pts): Correct DuckDB logic in fraud.py (Scatter payments, Round-trips, Pass-through shell).
 """
 
-prompt = f"""
---- GIT DIFF TO EVALUATE ---
-{code_diff}
+prompt = f"--- GIT DIFF ---\n{code_diff}\n\n--- PYTEST OUTPUT ---\n{pytest_output}"
 
---- PYTEST RESULTS ---
-{pytest_output}
-"""
-
-# Call Gemini API
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+
 response = client.models.generate_content(
-    model="gemini-3.6-flash",
+    model="gemini-2.5-flash",
     contents=prompt,
     config=types.GenerateContentConfig(
         system_instruction=system_prompt,
-        temperature=0.2,
+        temperature=0.1,
+        response_mime_type="application/json",
+        response_schema=EvaluationRubric,
     )
 )
 
-# Extract scores from Gemini text (fallback regex parsing)
-style_match = re.search(r"Code Style & Quality Score:\*\*?\s*(\d+)", response.text)
-sql_match = re.search(r"SQL Queries Score:\*\*?\s*(\d+)", response.text)
+# Parse validated JSON result
+eval_data = EvaluationRubric.model_validate_json(response.text)
 
-style_score = int(style_match.group(1)) if style_match else 0
-sql_score = int(sql_match.group(1)) if sql_match else 0
-
+style_score = eval_data.style_score
+sql_score = eval_data.sql_score
 total_score = test_score + ai_score + style_score + sql_score
 
-# 5. Build Final Markdown Comment
+# 5. Build PR Comment
 comment_body = f"""## 📊 Submission Evaluation Report
 
 ### Score Breakdown
 * **Automated Tests (20%):** {test_score}/20 {'✅ Passed' if test_score == 20 else '❌ Failed'}
-* **Anti-AI Policy Check (20%):** {ai_score}/20 {'✅ Clean' if ai_score == 20 else '❌ Violation Detected (-20 pts: Trigger word found)'}
+* **Anti-AI Policy Check (20%):** {ai_score}/20 {'✅ Clean' if ai_score == 20 else '❌ Violation (-20 pts: Trigger word detected)'}
 * **Code Style & Quality (20%):** {style_score}/20
 * **SQL Queries Correctness (40%):** {sql_score}/40
 
@@ -91,10 +81,13 @@ comment_body = f"""## 📊 Submission Evaluation Report
 
 ---
 
-{response.text}
+### Detailed Feedback
+
+* **Code Style & Quality:** {eval_data.style_feedback}
+* **SQL Queries Correctness:** {eval_data.sql_feedback}
 """
 
-# 6. Post Comment on PR
+# 6. Post Comment
 api = GhApi(token=os.environ["GITHUB_TOKEN"])
 owner, repo = os.environ["GITHUB_REPOSITORY"].split("/")
 pr_number = int(os.environ["PR_NUMBER"])
