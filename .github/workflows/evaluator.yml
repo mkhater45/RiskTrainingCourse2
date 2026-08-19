@@ -10,7 +10,8 @@ jobs:
     permissions:
       pull-requests: write
       contents: read
-
+      issues: write
+      
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4.2.2
