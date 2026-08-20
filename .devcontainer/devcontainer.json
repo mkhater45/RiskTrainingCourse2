@@ -19,7 +19,7 @@
   },
   
   // 1. Runs during prebuild: Pre-installs packages and bakes the 1.1 GB file into the background image snapshot
-  "onCreateCommand": "pip install --upgrade pip && pip install ipykernel pandas polars duckdb pyarrow numpy matplotlib && sudo mkdir -p /workspace_data_cache && sudo curl -L -o /workspace_data_cache/risk.duckdb 'https://tahastorage.blob.core.windows.net/training-public/risk.duckdb'",
+  "onCreateCommand": "pip install --upgrade pip && pip install ipykernel pandas polars duckdb openpyxl pyarrow numpy matplotlib && sudo mkdir -p /workspace_data_cache && sudo curl -L -o /workspace_data_cache/risk.duckdb 'https://tahastorage.blob.core.windows.net/training-public/risk.duckdb'",
 
   // 2. Runs instantly at startup: Moves the cached file from the image into your live workspace folder
   "postCreateCommand": "cp /workspace_data_cache/risk.duckdb ${containerWorkspaceFolder}/risk.duckdb"
