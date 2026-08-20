@@ -1,0 +1,93 @@
+name: Grade Day 3 Capstone
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  grade:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install package + dev deps
+        run: |
+          pip install -e ".[dev]"
+          pip install ruff
+
+      - name: Run deterministic scorer
+        run: python scoring/score.py .
+
+      - name: Post score to job summary
+        if: always()
+        run: |
+          echo "### Day 3 Capstone Score - ${{ github.repository }}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat score_report.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment score on pull request
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            if (!fs.existsSync('score_report.json')) {
+              return;
+            }
+            const r = JSON.parse(fs.readFileSync('score_report.json', 'utf8'));
+
+            let body = `### 🎯 Day 3 Capstone Score: **${r.final_score} / 100**\n\n`;
+            body += `| Category | Points |\n|---|---|\n`;
+            body += `| Hidden tests | ${r.tests.points} / ${r.tests.max}  (${r.tests.passed}/${r.tests.total} passed) |\n`;
+            body += `| Code quality (lint) | ${r.quality.points} / ${r.quality.max}  (${r.quality.lint_issues} issues) |\n`;
+            body += `| Insight *(manual, not yet scored)* | ${r.insight_manual.points} / ${r.insight_manual.max} |\n`;
+            body += `| Demo *(manual, not yet scored)* | ${r.demo_manual.points} / ${r.demo_manual.max} |\n`;
+            if (r.integrity.any_marker_found) {
+              body += `| ⚠️ Integrity penalty | -${r.integrity_penalty_applied} |\n`;
+              body += `\n> A required marker check flagged this submission for review. See the instructor if you believe this is a false positive.\n`;
+            }
+
+            const marker = '<!-- day3-capstone-score -->';
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body.includes(marker));
+
+            const finalBody = `${marker}\n${body}`;
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: finalBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: finalBody,
+              });
+            }
+
+      - name: Upload score report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: score-report
+          path: score_report.json
