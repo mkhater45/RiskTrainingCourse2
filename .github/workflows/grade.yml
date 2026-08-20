@@ -23,15 +23,18 @@ jobs:
           python-version: "3.11"
 
       - name: Install package + dev deps
+        working-directory: FinalPackage
         run: |
           pip install -e ".[dev]"
           pip install ruff
 
       - name: Run deterministic scorer
+        working-directory: FinalPackage
         run: python scoring/score.py .
 
       - name: Post score to job summary
         if: always()
+        working-directory: FinalPackage
         run: |
           echo "### Day 3 Capstone Score - ${{ github.repository }}" >> "$GITHUB_STEP_SUMMARY"
           echo '```json' >> "$GITHUB_STEP_SUMMARY"
@@ -44,10 +47,11 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            if (!fs.existsSync('score_report.json')) {
+            const path = 'FinalPackage/score_report.json';
+            if (!fs.existsSync(path)) {
               return;
             }
-            const r = JSON.parse(fs.readFileSync('score_report.json', 'utf8'));
+            const r = JSON.parse(fs.readFileSync(path, 'utf8'));
 
             let body = `### 🎯 Day 3 Capstone Score: **${r.final_score} / 100**\n\n`;
             body += `| Category | Points |\n|---|---|\n`;
@@ -90,4 +94,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: score-report
-          path: score_report.json
+          path: FinalPackage/score_report.json
