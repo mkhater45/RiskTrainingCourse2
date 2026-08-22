@@ -21,7 +21,7 @@ from .validation import (
     validate_transaction,
 )
 from .fraud import flag_velocity, benford_check, BENFORD_EXPECTED_PCT
-from .io import load_csv_folder, load_excel_folder, load_folder
+from .external_io import load_csv_folder, load_excel_folder, load_folder
 
 # 3. Package Version
 # This is a Python standard convention. It allows other programs or developers to 

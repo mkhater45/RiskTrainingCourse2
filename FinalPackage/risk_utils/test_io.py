@@ -5,10 +5,10 @@ import sys
 from pathlib import Path
 
 # Make FinalPackage/ (the parent of this risk_utils/ folder) importable,
-# so `risk_utils.io` resolves without needing `pip install -e .` first.
+# so `risk_utils.external_io` resolves without needing `pip install -e .` first.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from risk_utils.io import load_folder
+from risk_utils.external_io import load_folder
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
