@@ -12,6 +12,8 @@ from risk_utils.external_io import load_folder
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
+print("Loading from directory " + str(DATA_DIR))
+
 connection = load_folder(str(DATA_DIR))
 
 result = connection.sql("select count(*) from transactions")

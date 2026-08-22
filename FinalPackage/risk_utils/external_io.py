@@ -12,7 +12,7 @@ import duckdb
 import pandas as pd
 
 
-def load_csv_folder(folder_path, db_path="risk.duckdb"):
+def load_csv_folder(folder_path, db_path="files_db.duckdb"):
     """Load every CSV in folder_path into a `transactions` table.
 
     Requires at least one matching CSV file. Connects to db_path on disk
@@ -36,7 +36,7 @@ def load_excel_folder(folder_path, con):
     return con
 
 
-def load_folder(folder_path, db_path="risk.duckdb"):
+def load_folder(folder_path, db_path="files_db.duckdb"):
     """Load both CSV and Excel files in folder_path into one table."""
     con = load_csv_folder(folder_path, db_path)
     load_excel_folder(folder_path, con)
