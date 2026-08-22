@@ -1,6 +1,6 @@
 import pandas as pd
 
-from risk_utils.io import load_csv_folder, load_excel_folder, load_folder
+from risk_utils.external_io import load_csv_folder, load_excel_folder, load_folder
 
 
 def test_load_csv_folder_loads_all_matching_files(tmp_path):
