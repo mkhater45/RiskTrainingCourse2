@@ -7,7 +7,7 @@ hand every month.
 """
 
 import glob
-
+import os
 import duckdb
 import pandas as pd
 
@@ -18,10 +18,16 @@ def load_csv_folder(folder_path, db_path="files_db.duckdb"):
     Requires at least one matching CSV file. Connects to db_path on disk
     (not memory) so the data survives after the script ends.
     """
-    con = duckdb.connect(db_path)
-    
-    #Complete the function here to insert into the table Transactions
-    
+    csv_pattern = os.path.join(folder_path, "*.csv") #This is just folder_path/*.csv
+
+    con =  duckdb.connect(db_path)
+    # Overwrites the table completely with the current folder contents
+    con.sql(f"""
+        CREATE OR REPLACE TABLE transactions AS
+        -- COMPLETE THE STATEMENT HERE
+        -- SELECT ...
+    """)
+        
     return con
 
 
@@ -33,6 +39,7 @@ def load_excel_folder(folder_path, con):
     for file in glob.glob(f"{folder_path}/*.xlsx"):
         df = pd.read_excel(file)
         #complete the function to insert into the table Transactions
+        
     return con
 
 
