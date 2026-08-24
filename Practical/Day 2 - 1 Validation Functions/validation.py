@@ -10,6 +10,9 @@ def check_required_fields(txn, required=("Account", "Amount_Paid", "Timestamp"))
     ########################
     # Complete the function
     ########################
+    if set(txn.keys()) != set(required):
+        raise ValueError(f"missing required fields")
+
 
     return True
     
@@ -29,3 +32,4 @@ myTransaction = {"Amount_Paid":5,
                 }
 
 validate_transaction(myTransaction)
+

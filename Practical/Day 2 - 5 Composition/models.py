@@ -18,6 +18,15 @@ to_usd_factors = {
     "Saudi Riyal": 0.27
 }
 
+class CurrencyConverter:
+    
+
+    def to_usd(self,amount,base_currency):
+        return amount*to_usd_factors[base_currency]
+
+
+
+
 class Transaction:
     """A flagged transaction, with the context needed to act on it."""
 
@@ -28,15 +37,17 @@ class Transaction:
         self.currency = currency
         self.is_laundering = bool(is_laundering)
         self.timestamp = timestamp or datetime.now()
+        self.currencyconverter = CurrencyConverter()
 
     def summary(self):
         flag = "LAUNDERING" if self.is_laundering else "Not Laundering"
         return f"[{flag}] account_number={self.account_number} amount={self.amount}"
         
+    @log_call 
     def is_large(self):
         
-        #Fill in the logic for this method
-        return False
+        
+        return self.currencyconverter.to_usd(self.amount,self.currency) > 10000
 
 #Task:
 # 1) Create a class called CurrencyConverter that has a method called to_usd(amount,base_currency) and returns the amount in USD

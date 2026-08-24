@@ -33,7 +33,12 @@ class Transaction:
         flag = "LAUNDERING" if self.is_laundering else "Not Laundering"
         return f"[{flag}] account={self.account_number} amount={self.amount}"
         
+    def is_large(self):
+        usd_value = to_usd_factors[self.currency]*self.amount
+        return usd_value > 10000
 
+    def is_reportable(self):
+        return self.is_laundering and self.is_large()
 
 #Task:
 # Add a method, is_large(), that returns True if the amount is above USD 10,000 
@@ -50,5 +55,5 @@ myTransaction = Transaction(account_number = "515771",
                             currency = "Euro",
                             is_laundering = True)
 
-#print(myTransaction.is_large())
-#print(myTransaction.is_reportable())
+print(myTransaction.is_large())
+print(myTransaction.is_reportable())

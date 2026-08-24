@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from decorators import log_call
 class CurrencyConverter:
     def __init__(self):
         self.__to_usd_factors__ = {
@@ -40,7 +40,7 @@ class Transaction:
     def summary(self):
         flag = "LAUNDERING" if self.is_laundering else "Not Laundering"
         return f"[{flag}] account={self.account_number} amount={self.amount}"
-        
+    @log_call    
     def is_large(self):
         return self.__converter__.toUSD(self.amount,self.currency) > 10000
         

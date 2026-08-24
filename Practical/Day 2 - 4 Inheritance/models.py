@@ -47,17 +47,11 @@ class Transaction:
     def is_reportable(self):
         return (self.is_large() and self.is_laundering)
         
-class BitcoinTransaction:
+class BitcoinTransaction(Transaction):
     """A flagged transaction, with the context needed to act on it."""
 
     def __init__(self, account_number, account_name, amount, currency, is_laundering, timestamp=None):
-        self.account_number = account_number
-        self.account_name = account_name
-        self.amount = amount
-        self.currency = currency
-        self.is_laundering = bool(is_laundering)
-        self.timestamp = timestamp or datetime.now()
-        self.__converter__ = CurrencyConverter()
+        super().__init__(account_number, account_name, amount, currency, is_laundering, timestamp=None)
         
         if self.currency.lower() != "bitcoin":
             raise ValueError("Cannot create a Bitcoin transaction from a non-bitcoin currency!")

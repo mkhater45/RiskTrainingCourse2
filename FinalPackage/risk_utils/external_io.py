@@ -24,8 +24,10 @@ def load_csv_folder(folder_path, db_path="files_db.duckdb"):
     # Overwrites the table completely with the current folder contents
     con.sql(f"""
         CREATE OR REPLACE TABLE transactions AS
-        -- COMPLETE THE STATEMENT HERE
-        -- SELECT ...
+            
+        SELECT * FROM read_csv_auto('{folder_path}/*.csv')
+        
+
     """)
         
     return con
@@ -38,7 +40,7 @@ def load_excel_folder(folder_path, con):
     """
     for file in glob.glob(f"{folder_path}/*.xlsx"):
         df = pd.read_excel(file)
-        #complete the function to insert into the table Transactions
+        con.sql("INSERT INTO transactions SELECT * FROM df")
         
     return con
 
