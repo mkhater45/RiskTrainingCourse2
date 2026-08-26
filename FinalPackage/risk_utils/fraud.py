@@ -23,6 +23,50 @@ def flag_velocity(con, max_count=5):
         GROUP BY account
         HAVING COUNT(*) > {max_count}
     """).df()
+@timer
+def flag_scatter_payments(con,max_recipients=5):
+    return con.sql(f"""
+            SELECT from_account, COUNT( distinct to_account) AS txn_count
+            FROM transactions
+            GROUP BY from_account
+            HAVING COUNT( distinct to_account) > {max_recipients}
+        """).df()
+
+@timer
+def flag_round_trips(con):
+    return con.sql(f"""
+                select t1.* from transactions t1
+                inner join transactions t2
+                where t1.from_account = t2.to_account and
+                t1.to_account = t2.from_account
+                where t1.timestamp < t2.timestamp
+            """).df()
+
+@timer
+def flag_rapid_pass_through(con,threshold_ratio = 0.9):
+    return con.sql(f"""
+                    with out as (
+                   select  from_account, from bank, sum(amount_paid) as total_out
+                   from transactions group by from_account, from_bank),
+
+                   in as ( select t.to_account, t.to_bank, sum(t.amount_received) as total_in
+                   from transactions t inner join out o on t.to_account = o.from_account and t.to_bank = o.from_bank
+                   group by t.to_account, t.to_bank)
+
+                   select o.from_account as account_no, o.from_bank as bank,  o.total_out/i.total_in
+                   from out o inner join in i on o.from_account = i.to_account and o.from_bank = i.to_bank
+                   where o.total_out/i.total_in > {threshold_ratio} 
+
+                   
+                    
+                   
+                   
+                   )
+
+
+
+
+                """).df()
 
 
 @timer

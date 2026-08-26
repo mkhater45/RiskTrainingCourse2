@@ -61,3 +61,24 @@ class BitcoinTransaction(Transaction):
 
     def is_reportable(self):
         return True
+
+class AMLTransaction(Transaction):
+
+
+    def __init__(self, account_number, account_name, amount, currency, is_laundering, timestamp=None):
+        super().__init__(account_number, account_name, amount, currency, is_laundering, timestamp)
+
+
+    def is_Payment_format_anomoly(self,payment_format):
+        return self.is_large() and payment_format == 'Reinvestment'
+
+    def is_cross_bank_transfer(self,from_bank,to_bank):
+        return from_bank != to_bank
+
+    def is_fx_spread_anomoly(self,Amount_Paid, Amount_Received):
+        paid= self._converter.toUSD(Amount_Paid,self.currency)
+        received = self._converter.toUSD(Amount_Received,self.currency)
+        return paid > received * 1.05
+
+    
+
