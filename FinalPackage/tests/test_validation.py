@@ -1,4 +1,5 @@
 import pytest
+import risk_utils
 
 from risk_utils.validation import (
     check_positive_amount,
@@ -12,8 +13,14 @@ def test_check_positive_amount_raises_on_negative():
     with pytest.raises(ValueError):
         check_positive_amount(-100)
 
+def test_check_zero_amount_raises_on_negative():
+    with pytest.raises(ValueError):
+        check_positive_amount(0)
+
+
 
 def test_check_positive_amount_passes_on_positive():
+
     assert check_positive_amount(100) is True
 
 
@@ -50,3 +57,4 @@ def test_validate_transaction_raises_on_negative_amount():
     txn = {"Account": "A1", "Amount_Paid": -50, "Timestamp": "2024-01-01"}
     with pytest.raises(ValueError):
         validate_transaction(txn)
+
